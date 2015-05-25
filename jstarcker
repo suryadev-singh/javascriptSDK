@@ -1,0 +1,52 @@
+(function ($) {
+  $.fn.userDetails = function (options) {
+  
+    var setting = $.extend({ }, options );                      
+    var now = new Date();
+    var time = now.getTime();
+    time += 3600 * 1000;
+    var now                         =    now.setTime(time);      
+    var timein                      =    Math.round((new Date().getTime())/1000) ; 
+    var page                        =    setting.page;
+    var page_detail                 =    setting.page_detail;
+    var event                       =    (setting.event_option) ? setting.event_option:'';
+        
+    document.cookie = "timein="+timein;
+    document.cookie = "page="+page;
+    document.cookie = "page_detail="+page_detail;
+    document.cookie = "event="+ event;    
+    var allCookie = document.cookie.split(";");             
+    var check_session_id = false;
+    for(var i = 0 ;i<allCookie.length;i++){
+       var key = allCookie[i].split("=")[0];       
+       if(key.trim() == 'sessionid'.trim()){
+           check_session_id = true;
+           break;          
+       }
+       else{
+         check_session_id = false;
+       }
+    }    
+    if(!check_session_id) {      
+      document.cookie = "sessionid=;";           
+      document.cookie = "publisher=;";
+      document.cookie = "event=;";
+      document.cookie = "uniquevisitorcookie=;";
+      document.cookie = "fingerprint=;";      
+      document.cookie = "prevtimein="+timein;              
+    }       
+    var data = (document.cookie.replace(/;/g, '&')).replace(/\s+/g, '');      
+    $.ajax({
+       type: "GET",       
+       url:"http://192.168.1.11:81/maven_ad2campaign/sites/development/site/index.php?ad2cid=1/ad2c@ad2c@",       
+       data: data              
+    }).done(function( data ) {           
+      document.cookie = "sessionid="+data.split('@')[1]+';expires=' + now;                       
+      document.cookie="publisher="+ data.split('@')[2];      
+      document.cookie="uniquevisitorcookie="+ data.split('@')[3];
+      document.cookie="fingerprint="+ data.split('@')[4];               
+      document.cookie="prevtimein="+timein;           
+    });                
+  }  
+})(jQuery);   
+    
